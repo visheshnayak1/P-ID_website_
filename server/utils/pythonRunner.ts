@@ -47,8 +47,8 @@ export async function runPythonDetection(
       scriptPath,
       "--image", imagePath,
       "--output", outputPath,
-      "--conf", options.confidenceThreshold.toString(),
-      "--iou", options.iouThreshold.toString()
+      "--conf-thres", options.confidenceThreshold.toString(),
+      "--iou-thres", options.iouThreshold.toString()
     ]);
 
     let resultData = "";

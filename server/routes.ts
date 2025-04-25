@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
@@ -36,7 +36,7 @@ const upload = multer({
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG and GIF files are allowed.') as any);
+      cb(new Error('Invalid file type. Only JPEG, PNG and GIF files are allowed.'));
     }
   }
 });
@@ -55,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Endpoint to upload and process P&ID image
-  app.post("/api/detect", upload.single('image'), async (req: Request, res: Response) => {
+  app.post("/api/detect", upload.single('image'), async (req: Request & { file?: Express.Multer.File }, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -102,11 +102,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create processed image record
-      const resultId = nanoid();
+      const resultId = detectionResults.id || nanoid();
       const processedImage: ProcessedImage = {
         id: resultId,
-        originalImage: `data:image/jpeg;base64,${detectionResults.original_image}`,
-        processedImage: `data:image/jpeg;base64,${detectionResults.processed_image}`,
+        originalImage: detectionResults.originalImage,
+        processedImage: detectionResults.processedImage,
         detections: processedResults
       };
 
